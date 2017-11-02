@@ -1,7 +1,7 @@
 package hello;
 
 public class ToDo {
-    private Integer id;
+    protected Integer id;
 
     public Integer getId() {
         return id;
@@ -19,7 +19,7 @@ public class ToDo {
         this.content = content;
     }
 
-    public Boolean getDone() {
+    public Boolean isDone() {
         return done;
     }
 
@@ -27,6 +27,6 @@ public class ToDo {
         this.done = done;
     }
 
-    private String content;
-    private Boolean done;
+    protected String content;
+    protected Boolean done;
 }

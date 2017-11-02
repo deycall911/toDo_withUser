@@ -1,6 +1,7 @@
 package hello.Entity;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "users_todos")
@@ -36,4 +37,24 @@ public class UserToDoList {
     private Integer userId;
 
     private Integer toDoId;
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    private Date created;
+
+    public Boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(Boolean favorite) {
+        this.favorite = favorite;
+    }
+
+    private Boolean favorite;
 }
