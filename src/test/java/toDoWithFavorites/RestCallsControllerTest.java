@@ -1,7 +1,7 @@
-package hello;
+package toDoWithFavorites;
 
-import hello.Entity.User;
-import hello.Repository.ToDoEntityRepository;
+import toDoWithFavorites.Entity.User;
+import toDoWithFavorites.Repository.ToDoEntityRepository;
 import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;

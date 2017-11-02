@@ -1,4 +1,4 @@
-package hello;
+package toDoWithFavorites;
 
 import org.apache.commons.io.IOUtils;
 

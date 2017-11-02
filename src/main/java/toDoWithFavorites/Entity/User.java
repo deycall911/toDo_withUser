@@ -1,4 +1,4 @@
-package hello.Entity;
+package toDoWithFavorites.Entity;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

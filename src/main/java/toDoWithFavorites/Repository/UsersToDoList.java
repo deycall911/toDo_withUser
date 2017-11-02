@@ -1,6 +1,6 @@
-package hello.Repository;
+package toDoWithFavorites.Repository;
 
-import hello.Entity.UserToDoList;
+import toDoWithFavorites.Entity.UserToDoList;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;

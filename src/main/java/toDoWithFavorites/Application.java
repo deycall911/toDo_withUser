@@ -1,11 +1,7 @@
-package hello;
+package toDoWithFavorites;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.filter.CommonsRequestLoggingFilter;
-import org.thymeleaf.spring4.view.ThymeleafViewResolver;
 
 @SpringBootApplication
 public class Application {

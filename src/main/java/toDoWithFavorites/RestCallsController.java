@@ -1,9 +1,9 @@
-package hello;
+package toDoWithFavorites;
 
-import hello.Entity.User;
-import hello.Entity.UserToDoList;
-import hello.Repository.Users;
-import hello.Repository.UsersToDoList;
+import toDoWithFavorites.Entity.User;
+import toDoWithFavorites.Entity.UserToDoList;
+import toDoWithFavorites.Repository.Users;
+import toDoWithFavorites.Repository.UsersToDoList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;

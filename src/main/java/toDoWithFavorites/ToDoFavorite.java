@@ -1,4 +1,4 @@
-package hello;
+package toDoWithFavorites;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package hello;
+package toDoWithFavorites;
 
 public class ToDo {
     protected Integer id;

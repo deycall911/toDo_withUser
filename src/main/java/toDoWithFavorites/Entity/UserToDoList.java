@@ -1,4 +1,4 @@
-package hello.Entity;
+package toDoWithFavorites.Entity;
 
 import javax.persistence.*;
 import java.util.Date;
