@@ -4,7 +4,7 @@ var webpack = require('webpack');
 module.exports = {
     devtool: 'eval',
     entry: [
-        './src/main/resources/static/main'
+        './src/main/resources/js/main'
     ],
     watchOptions: {
         poll: true
