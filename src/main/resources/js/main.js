@@ -1,4 +1,5 @@
 'use strict';
+import {observable} from "../../../../node_modules/mobx/lib/mobx";
 
 // tag::vars[]
 const React = require('react');
@@ -9,9 +10,10 @@ const client = require('./client');
 // tag::app[]
 class App extends React.Component {
 
+    @observable toDoList = [];
 	constructor(props) {
 		super(props);
-		this.state = {toDoList: []};
+		this.state = { toDoList: this.toDoList};
 		this.deleteJob = this.deleteJob.bind(this);
         this.deleteJobFromArray = this.deleteJobFromArray.bind(this);
         this.addJob = this.addJob.bind(this);

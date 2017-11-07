@@ -1,5 +1,8 @@
 package toDoWithFavorites;
 
+import com.deliveredtechnologies.rulebook.FactMap;
+import com.deliveredtechnologies.rulebook.lang.RuleBookBuilder;
+import com.deliveredtechnologies.rulebook.model.RuleBook;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;

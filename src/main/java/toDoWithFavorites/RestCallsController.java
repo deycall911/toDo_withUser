@@ -1,5 +1,6 @@
 package toDoWithFavorites;
 
+import org.springframework.web.bind.annotation.RequestBody;
 import toDoWithFavorites.Entity.User;
 import toDoWithFavorites.Entity.UserToDoList;
 import toDoWithFavorites.Repository.Users;
@@ -20,6 +21,7 @@ import javax.ws.rs.core.GenericType;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -37,6 +39,29 @@ public class RestCallsController {
 
     @Autowired
     UsersToDoList usersToDoList;
+
+    @RequestMapping(method = POST, value = "/api/create/user")
+    public User createUser(@RequestBody Map<String,String> body) throws Exception{
+        User newUser = new User();
+        newUser.setUsername(body.get("username"));
+        newUser.setPassword(body.get("password"));
+
+        MyUserPrincipal userDetails = (MyUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = users.findByUsername(userDetails.getUsername());
+
+        if (users.findByUsername(newUser.getUsername()) != null) {
+            throw new RuntimeException("That username is already taken");
+        }
+        if (user.getRole() == Role.ADMIN) {
+            newUser.setRole(Role.SUPERVISOR);
+        } else if (user.getRole() == Role.SUPERVISOR) {
+            newUser.setRole(Role.USER);
+        } else {
+            throw new Exception("You don't have enough privileges to create user");
+        }
+
+        return users.save(newUser);
+    }
 
     @RequestMapping(method = POST, value = "/api/insert/{job}")
     public ToDoFavorite insert(@PathVariable String job) {
