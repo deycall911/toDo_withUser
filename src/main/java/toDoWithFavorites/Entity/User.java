@@ -1,6 +1,6 @@
 package toDoWithFavorites.Entity;
 
-import toDoWithFavorites.Role;
+import toDoWithFavorites.Enums.Role;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -51,6 +51,16 @@ public class User {
     public Role getRole() {
         return role;
     }
+
+    public Integer getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Integer ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    private Integer ownerId;
 
     public void setRole(Role role) {
         this.role = role;

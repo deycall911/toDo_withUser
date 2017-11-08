@@ -1,5 +1,7 @@
 package toDoWithFavorites.Entity;
 
+import toDoWithFavorites.Enums.ToDoStatus;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -57,4 +59,15 @@ public class UserToDoList {
     }
 
     private Boolean favorite;
+
+    public ToDoStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ToDoStatus status) {
+        this.status = status;
+    }
+
+    @Enumerated(EnumType.STRING)
+    private ToDoStatus status;
 }
