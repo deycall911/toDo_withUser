@@ -38,6 +38,5 @@ dependencies {
     compile("org.glassfish.jersey.core:jersey-client")
     compile("org.apache.directory.studio:org.apache.commons.io:2.4")
     compile('com.deliveredtechnologies:rulebook-core:0.9')
-
 }
 

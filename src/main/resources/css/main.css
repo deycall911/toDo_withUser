@@ -15,3 +15,9 @@ table{
 td{
     word-wrap:break-word
 }
+
+.user_block {
+    float:right;
+    display:block;
+    margin:3px;
+}

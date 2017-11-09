@@ -1,5 +1,9 @@
 package toDoWithFavorites;
 
+import com.deliveredtechnologies.rulebook.FactMap;
+import com.deliveredtechnologies.rulebook.NameValueReferableMap;
+import com.deliveredtechnologies.rulebook.lang.RuleBookBuilder;
+import com.deliveredtechnologies.rulebook.model.RuleBook;
 import org.springframework.web.bind.annotation.RequestBody;
 import toDoWithFavorites.Entity.User;
 import toDoWithFavorites.Entity.UserToDoList;
@@ -8,6 +12,7 @@ import toDoWithFavorites.Enums.ToDoStatus;
 import toDoWithFavorites.Exceptions.CustomException;
 import toDoWithFavorites.Exceptions.NotEnoughPrivilegesException;
 import toDoWithFavorites.Exceptions.UserAlreadyExistException;
+import toDoWithFavorites.Exceptions.WrongStatusException;
 import toDoWithFavorites.Exceptions.WrongUserException;
 import toDoWithFavorites.Repository.Users;
 import toDoWithFavorites.Repository.UsersToDoList;
@@ -31,6 +36,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static toDoWithFavorites.Enums.ToDoStatus.BLOCKED;
+import static toDoWithFavorites.Enums.ToDoStatus.DONE;
+import static toDoWithFavorites.Enums.ToDoStatus.IN_PROGRESS;
+import static toDoWithFavorites.Enums.ToDoStatus.TODO;
 
 @RestController
 public class RestCallsController {
@@ -46,8 +55,14 @@ public class RestCallsController {
     @Autowired
     UsersToDoList usersToDoList;
 
+    @RequestMapping("/me")
+    public User getCurrentUserData() {
+        MyUserPrincipal currentUserDetails = (MyUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return users.findByUsername(currentUserDetails.getUsername());
+    }
+
     @RequestMapping("/user/{username}")
-    public User getCurrentUserData(@PathVariable String username) throws CustomException {
+    public User getUserData(@PathVariable String username) throws CustomException {
         MyUserPrincipal currentUserDetails = (MyUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User requestedUser = users.findByUsername(username);
         User currentUser = users.findByUsername(currentUserDetails.getUsername());
@@ -91,6 +106,38 @@ public class RestCallsController {
         return users.save(newUser);
     }
 
+    @RequestMapping(method = POST, value = "/api/status/{id}/{newStatus}")
+    public ToDoStatus changeStatus(@PathVariable Integer id, @PathVariable ToDoStatus newStatus) throws Exception {
+        MyUserPrincipal userDetails = (MyUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        belongToUser(userDetails.getUserId(), id);
+        UserToDoList currentToDoUserRelation = usersToDoList.findByToDoId(id);
+
+        RuleBook ruleBook = RuleBookBuilder.create()
+                .addRule(rule -> rule.withFactType(ToDoStatus.class)
+                        .when(f -> currentToDoUserRelation.getStatus().getId() + 1 == f.getOne().getId())
+                        .then(f -> saveStatus(currentToDoUserRelation, f.getOne())))
+                .addRule(rule -> rule.withFactType(ToDoStatus.class)
+                        .when(f -> currentToDoUserRelation.getStatus().getId() + 1 != f.getOne().getId())
+                        .then(f -> saveStatus(currentToDoUserRelation, BLOCKED))
+                ).build();
+
+        NameValueReferableMap factMap = new FactMap();
+        factMap.setValue(currentToDoUserRelation.getStatus().toString(), newStatus);
+        ruleBook.run(factMap);
+
+        return usersToDoList.findByToDoId(id).getStatus();
+    }
+
+    private void saveStatus(UserToDoList currentToDoUserRelation, ToDoStatus status) {
+        try {
+            currentToDoUserRelation.setStatus(status);
+            usersToDoList.save(currentToDoUserRelation);
+        } catch (Exception e) {
+            currentToDoUserRelation.setStatus(BLOCKED);
+            usersToDoList.save(currentToDoUserRelation);
+        }
+    }
+
     @RequestMapping(method = POST, value = "/api/insert/{job}")
     public ToDoFavorite insert(@PathVariable String job) {
         MyUserPrincipal userDetails = (MyUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -105,7 +152,7 @@ public class RestCallsController {
         newUserToDo.setToDoId(toDo.getId());
         newUserToDo.setCreated(new Date());
         newUserToDo.setFavorite(false);
-        newUserToDo.setStatus(ToDoStatus.TODO);
+        newUserToDo.setStatus(TODO);
 
         usersToDoList.save(newUserToDo);
 
@@ -142,13 +189,12 @@ public class RestCallsController {
     public ToDoFavorite markAsDone(@PathVariable int id, @PathVariable Boolean done) throws Exception {
         MyUserPrincipal userDetails = (MyUserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<ToDoFavorite> currentUserToDoUsers = belongToUser(userDetails.getUserId(), id);
-        ToDoFavorite currentToDo = currentUserToDoUsers.stream().filter(toDo -> toDo.getId() == id).findFirst().get();
+        ToDoFavorite currentToDoFavorite = belongToUser(userDetails.getUserId(), id);
         ToDo oldToDo = getClient().path("markDone").path(String.valueOf(id)).path(String.valueOf(done))
                 .request().header("xAuth", "teste")
                 .post(Entity.json("")).readEntity(ToDo.class);
 
-        return new ToDoFavorite(oldToDo, usersToDoList.findByToDoId(id).isFavorite(), currentToDo.getStatus());
+        return new ToDoFavorite(oldToDo, usersToDoList.findByToDoId(id).isFavorite(), currentToDoFavorite.getStatus());
     }
 
     @RequestMapping("/api/markFavorite/{id}/{favorite}")
@@ -196,13 +242,13 @@ public class RestCallsController {
         }).collect(Collectors.toList());
     }
 
-    //Return all users toDosFavorite
-    private List<ToDoFavorite> belongToUser(int userId, int toDoId) throws Exception {
+    //Return current toDoFavorite
+    private ToDoFavorite belongToUser(int userId, int toDoId) throws Exception {
         List<ToDoFavorite> toDos = getUsersToDos(userId);
         if (toDos == null || toDos.isEmpty() || toDos.stream().noneMatch(x -> x.getId() == toDoId)) {
             throw new WrongUserException("This toDo doesn't exist or doesn't belong to you");
         }
-        return toDos;
+        return toDos.stream().filter(toDoFavorite -> toDoFavorite.getId() == toDoId).findFirst().get();
     }
 
 
