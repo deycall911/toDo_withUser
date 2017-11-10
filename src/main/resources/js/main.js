@@ -5,6 +5,10 @@ import {observable} from "../../../../node_modules/mobx/lib/mobx";
 const React = require('react');
 const ReactDOM = require('react-dom');
 const client = require('./client');
+
+var Client = require('node-rest-client').Client;
+
+var client2 = new Client();
 // end::vars[]
 
 // tag::app[]
@@ -147,18 +151,34 @@ class ToDoList extends React.Component {
 }
 
 // end::employee-list[]
+
+
 class Header extends React.Component {
     render() {
         return (
             <div>
                 <div className="user_block">
                     <p>{this.state === null ? "" : this.state.username}</p>
-                    <button id="logout" onClick={this.logOut}>Logout</button>
+                    <button onClick={this.logOut}>Logout</button>
+                </div>
+                <div className="add_user">
+                    <input className="userinput" onChange={this.fillUsername}/>
+                    <input className="userinput" onChange={this.fillPassword}/>
+                    <button onClick={this.createUser}>Add User</button>
                 </div>
                 <h1>ToDo List</h1>
             </div>
         )
     }
+
+    fillUsername(e) {
+        this.state.newUsername = e.target.value;
+    }
+
+    fillPassword(e) {
+        this.state.newPassword = e.target.value;
+    }
+
 
     componentDidMount() {
         var thisApp = this;
@@ -168,16 +188,32 @@ class Header extends React.Component {
             headers: {'xAuth': 'teste'}
         }).then(response => {
             thisApp.setState({username: response.entity.username})
-
         });
     }
 
     constructor(props) {
         super(props);
+        this.fillUsername = this.fillUsername.bind(this);
+        this.fillPassword = this.fillPassword.bind(this);
+        this.createUser = this.createUser.bind(this);
     }
 
     logOut() {
         window.location.href = '/logout';
+    }
+
+    createUser() {
+        console.log(this.state.newUsername)
+        var args = {
+            data: {username: this.state.newUsername, password: this.state.newPassword},
+            headers: {"Content-Type": "application/json"}
+        };
+        client2.post("http://localhost:8090/api/create/user", args, function (data, response) {
+            // parsed response body as js object
+            console.log(data);
+            // raw response
+            console.log(response);
+        });
     }
 }
 
